@@ -1,6 +1,6 @@
 # LocalPulse
 
-A Next.js prototype for discovering food and drink businesses near Jalan Telawi, Bangsar, checking their websites, saving prospects, preparing bilingual proposals, and previewing outreach.
+A Next.js prototype for discovering local businesses around a chosen area, checking their websites, saving prospects, preparing bilingual proposals, and previewing outreach.
 
 ## Run on this computer
 
@@ -15,9 +15,9 @@ Open http://localhost:3001. Leave the development server running; changes to app
 
 ## Discovery and audit
 
-- **Demo mode** in the top-right switch loads Bluebird Corner Cafe, a fictional business with simulated audit findings, an example proposal and a draft conversation. Switching back to Live restores the original workspace; sample changes are not saved to your live prospects. Demo mode resets to Live on refresh. Its example website is not real, and no Google or website request is made. The sample report and downloaded proposal are clearly labelled; sample contact details are used only if your own have not been entered.
+- **Demo mode** is on by default and includes four fictional businesses: Bluebird Corner Cafe, Luma Hair Studio, Petal & Stem and Golden Crumb Bakery. Each has its own fictional brand mark, simulated report, and demo website. Business names open websites, and location links open Google Maps searches (general areas for the fictional businesses). Switching to Live restores your live prospects; demo changes stay separate.
 
-- **Find businesses** searches OpenStreetMap's map service in a fixed area around Jalan Telawi. The optional name narrows that area's results. Community data can be incomplete or outdated, and the public service may be unavailable or rate-limited. Results credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright). You can enter a known business manually if search is unavailable.
+- **Find businesses** searches OpenStreetMap around the selected area, defaulting to central Kuala Lumpur. Choose Bangsar, Petaling Jaya or Cheras, or explicitly request the device's current location. Coordinates are sent with a live search only after permission. The optional name filters results. Community data can be incomplete or outdated, and the public service may be unavailable or rate-limited. Results credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
 - Website checks fetch the returned HTML and look for HTTP status, HTTPS, a viewport tag, and obvious WhatsApp or booking text. They do not render scripts, check other pages, or provide a full mobile usability assessment. A website absent from the map data is **not** proof that the business has none.
 - Prospects, website check results, proposal details and price are saved in this browser's local storage. Clearing browser data removes them. They are not shared between devices or browsers.
 - The local Google Cloud project `localpulse-audit-20261117` has Places API enabled, billing disabled, and a daily Text Search quota of 25. The project currently responds without billing; Google may restrict unbilled projects, so continued availability is not guaranteed. The API key is stored in the ignored `.env.local` file and restricted to the Places API.
@@ -45,6 +45,6 @@ Use **Upload information** on Discover to upload up to three PDF, XLSX, DOCX, CS
 
 Readable text is sent to Gemini 3.1 Flash-Lite for analysis. Google may use free-tier content to improve its products; do not submit company information unless you have permission to share it. Uploaded files and extracted text are not stored by LocalPulse after processing. The generated summary and recommendations are saved in this browser with the prospect, and identical analyses are cached in server memory for 30 minutes (up to 40 entries); restarting the server clears that cache. AI suggestions and any information not mentioned in a document require verification; an omitted website is not proof that none exists.
 
-The local Google Cloud project has billing disabled and the Gemini API enabled. The restricted `GEMINI_API_KEY` is stored in `.env.local`. Free-tier availability and quotas are determined by Google; exhaustion or service unavailability is reported in the app. Demo mode uses prefilled fictional notes and simulated results without making an AI request.
+The local Google Cloud project has billing disabled and the Gemini API enabled. The restricted `GEMINI_API_KEY` is stored in `.env.local`. Free-tier availability and quotas are determined by Google; exhaustion or service unavailability is reported in the app. Demo mode lets you select files and uses prefilled fictional notes, but shows simulated results without reading or uploading those files or making an AI request. Download the example PDF from the upload panel. Switch to Live for real document extraction and Gemini analysis.
 
-The discovery radar is an interactive visualisation, not a geographic map: its pin positions are illustrative. At most 12 results are shown on the radar, while the full list appears below. Click a pin to open a listed website or view its audit. The Bluebird demo site is fictional.
+The discovery radar is an interactive visualisation, not a geographic map: its pin positions are illustrative. At most 12 results are shown on the radar, while the full list appears below. Click a pin to open a listed website or view its audit. All four demo sites and their findings are fictional. Screenshot thumbnails open at full size, where the reviewer can draw or adjust a labelled red review rectangle. The label and rectangle are included in the PDF; they indicate an area to review and do not by themselves prove that a feature is missing. Live screenshots must be supplied by the reviewer.

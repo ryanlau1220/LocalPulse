@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { jsPDF } from 'jspdf';
 import ExcelJS from 'exceljs';
 import JSZip from 'jszip';
@@ -37,4 +38,11 @@ test('validates files and caches identical analyses without a second AI request'
   assert.equal(first.cached, false); assert.equal(second.cached, true); assert.equal(calls, 1);
   assert.equal(second.businessName, 'Harbour Fixture Cafe');
   await assert.rejects(analyzeDocuments([], '', { key:'fixture-key', fetcher }), /Add a file/);
+});
+
+test('extracts the provided sample company PDF', async () => {
+  const contents = await readFile('public/samples/bluebird-company-information.pdf');
+  const text = await extractFile(file(contents, 'bluebird-company-information.pdf'));
+  assert.match(text, /Bluebird Corner Cafe/);
+  assert.match(text, /menu, opening hours and location/);
 });
