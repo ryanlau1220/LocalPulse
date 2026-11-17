@@ -51,7 +51,7 @@ The discovery radar is an interactive visualisation, not a geographic map: its p
 
 ## Visual audit evidence
 
-The Bluebird demo deliberately contains a clipped heading on small screens. Its mobile screenshot and the recorded viewport and page widths come from a real Chromium mobile-emulation capture of the fictional site. To regenerate the screenshot and measurements, run `pnpm dev` in one terminal and `pnpm demo:evidence` in another. The capture command only accepts a local demo server.
+The Bluebird demo deliberately contains a clipped heading on small screens. Its mobile screenshot and the recorded viewport and page widths come from a real Chromium mobile-emulation capture of the fictional site. To regenerate the screenshot and measurements, run `pnpm dev` in one terminal and `pnpm demo:evidence` in another. The capture also generates a separate inspection view for each demo finding: a captured page alongside the links or metadata actually observed on its initial rendered page. These views are labelled as generated fictional evidence; they do not establish what exists on other pages. The capture command only accepts a local demo server.
 
 No general live-site screenshots or automated visual usability tests are performed. The existing live audit checks returned HTML, and a missing viewport tag or link is a signal for review, not proof of a rendered defect. For real businesses, upload a relevant screenshot and record the view, viewport size, observation and reproduction steps. Red annotations are reviewer-drawn unless explicitly labelled as measured demo evidence.
 

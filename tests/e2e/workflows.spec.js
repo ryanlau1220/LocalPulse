@@ -335,8 +335,11 @@ test('sample businesses have matching websites and expandable evidence', async (
   await radar.getByRole('button',{name:'View audit'}).click();
   await expect(page.getByRole('heading',{name:'Luma Hair Studio'})).toBeVisible();
   await expect(page.getByText('Improve search result description', { exact: true })).toBeVisible();
-  await expect(page.getByText('No visual evidence captured for this finding. Verify it before sharing.').first()).toBeVisible();
-  await expect(page.getByRole('button',{name:'Expand screenshot for Improve search result description'})).toHaveCount(0);
+  await page.getByRole('button',{name:'Expand screenshot for Improve search result description'}).click();
+  await expect(page.getByAltText('Expanded screenshot for Improve search result description')).toBeVisible();
+  await page.getByRole('button',{name:'Close screenshot'}).click();
+  for (const row of await page.locator('.finding-row').all()) await expect(row.locator('.evidence-preview img')).toBeVisible();
+  await expect(page.getByText(/Generated DOM inspection/).first()).toBeVisible();
 });
 
 test('current location is sent to discovery only after permission', async ({ page, context, request }) => {
@@ -456,7 +459,8 @@ test('measured mobile evidence matches the demo page and is not reused for unrel
   const image=row.getByAltText('Screenshot context for Review mobile usability');
   await expect(image).toBeVisible();
   expect(await image.evaluate(img=>({width:img.naturalWidth,height:img.naturalHeight}))).toEqual({width:390,height:844});
-  await expect(page.locator('.finding-row').filter({hasText:'Add a contact or booking path'}).getByRole('button',{name:/Expand screenshot/})).toHaveCount(0);
+  await expect(page.locator('.finding-row').filter({hasText:'Add a contact or booking path'}).locator('.evidence-preview img')).toHaveAttribute('src','/evidence/bluebird-conversion.jpg');
+  for (const finding of await page.locator('.finding-row').all()) await expect(finding.locator('.evidence-preview img')).toBeVisible();
   const demo=await context.newPage();
   await demo.setViewportSize({width:390,height:844});
   await demo.goto('/demo/bluebird');
@@ -468,13 +472,15 @@ test('measured mobile evidence matches the demo page and is not reused for unrel
   const pdf=(await readFile(await download.path())).toString('latin1');
   expect(pdf).toContain('Mobile viewport: 390 x 844 CSS px');
   expect(pdf).toContain('heading is clipped');
-  expect(pdf).toContain('Screenshot not supplied');
+  expect(pdf).toContain('Generated DOM inspection');
+  expect(pdf).not.toContain('Screenshot not supplied');
 });
 
 test('an interested reply unlocks a comparison only after a message with a proposal', async ({page})=>{
   await page.goto('/');
   await expect(page.getByRole('heading',{name:/Recent searches/})).toBeVisible();
-  await expect(page.locator('.search-row').getByRole('button',{name:'Upload information'})).toBeVisible();
+  await expect(page.locator('.hero-search').getByRole('button',{name:'Upload information'})).toBeVisible();
+  await expect(page.locator('.hero-search').getByRole('button',{name:'Find businesses'})).toBeEmpty();
   await expect(page.getByRole('button',{name:'Find businesses'})).toHaveCount(1);
   await page.getByRole('button',{name:'Outreach',exact:true}).click();
   const composer=page.locator('.chat-composer-area');

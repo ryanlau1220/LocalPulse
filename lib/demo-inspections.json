@@ -1,0 +1,142 @@
+{
+  "bluebird": {
+    "title": "Bluebird Corner Cafe | Fictional demo",
+    "description": "Find practical opportunities to improve a local business’s online presence.",
+    "links": [
+      {
+        "text": "bluebird.",
+        "href": "#home"
+      },
+      {
+        "text": "Our story",
+        "href": "#story"
+      },
+      {
+        "text": "Visit us",
+        "href": "#visit"
+      },
+      {
+        "text": "Come say hello",
+        "href": "#visit"
+      },
+      {
+        "text": "Explore the Bangsar area on Google Maps",
+        "href": "https://www.google.com/maps/search/?api=1&query=Bangsar%2C%20Kuala%20Lumpur"
+      }
+    ],
+    "counts": {
+      "whatsapp": 0,
+      "booking": 0,
+      "phone": 0,
+      "email": 0
+    },
+    "sourcePath": "/demo/bluebird",
+    "browser": "Chromium 155.0.8059.39 (mobile emulation)",
+    "capturedAt": "2026-11-17T05:52:10.355Z"
+  },
+  "luma": {
+    "title": "LocalPulse — Good things grow locally",
+    "description": "Find practical opportunities to improve a local business’s online presence.",
+    "links": [
+      {
+        "text": "luma.",
+        "href": "#home"
+      },
+      {
+        "text": "Our story",
+        "href": "#story"
+      },
+      {
+        "text": "Visit us",
+        "href": "#visit"
+      },
+      {
+        "text": "Discover our story",
+        "href": "#story"
+      },
+      {
+        "text": "Explore this area on Google Maps",
+        "href": "https://www.google.com/maps/search/?api=1&query=Petaling%20Jaya%2C%20Selangor"
+      }
+    ],
+    "counts": {
+      "whatsapp": 0,
+      "booking": 0,
+      "phone": 0,
+      "email": 0
+    },
+    "sourcePath": "/demo/luma",
+    "browser": "Chromium 155.0.8059.39 (mobile emulation)",
+    "capturedAt": "2026-11-17T05:52:11.434Z"
+  },
+  "petal": {
+    "title": "LocalPulse — Good things grow locally",
+    "description": "Find practical opportunities to improve a local business’s online presence.",
+    "links": [
+      {
+        "text": "petal & stem.",
+        "href": "#home"
+      },
+      {
+        "text": "Our story",
+        "href": "#story"
+      },
+      {
+        "text": "Visit us",
+        "href": "#visit"
+      },
+      {
+        "text": "Discover our story",
+        "href": "#story"
+      },
+      {
+        "text": "Explore this area on Google Maps",
+        "href": "https://www.google.com/maps/search/?api=1&query=Kuala%20Lumpur%2C%20Malaysia"
+      }
+    ],
+    "counts": {
+      "whatsapp": 0,
+      "booking": 0,
+      "phone": 0,
+      "email": 0
+    },
+    "sourcePath": "/demo/petal",
+    "browser": "Chromium 155.0.8059.39 (mobile emulation)",
+    "capturedAt": "2026-11-17T05:52:12.434Z"
+  },
+  "golden": {
+    "title": "LocalPulse — Good things grow locally",
+    "description": "Find practical opportunities to improve a local business’s online presence.",
+    "links": [
+      {
+        "text": "golden crumb.",
+        "href": "#home"
+      },
+      {
+        "text": "Our story",
+        "href": "#story"
+      },
+      {
+        "text": "Visit us",
+        "href": "#visit"
+      },
+      {
+        "text": "Discover our story",
+        "href": "#story"
+      },
+      {
+        "text": "Explore this area on Google Maps",
+        "href": "https://www.google.com/maps/search/?api=1&query=Cheras%2C%20Kuala%20Lumpur"
+      }
+    ],
+    "counts": {
+      "whatsapp": 0,
+      "booking": 0,
+      "phone": 0,
+      "email": 0
+    },
+    "sourcePath": "/demo/golden",
+    "browser": "Chromium 155.0.8059.39 (mobile emulation)",
+    "capturedAt": "2026-11-17T05:52:13.467Z"
+  }
+}
