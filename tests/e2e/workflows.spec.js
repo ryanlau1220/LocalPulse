@@ -138,7 +138,7 @@ test('demo mode supports the complete sample without service calls', async ({ pa
   await expect(page.getByRole('heading', { name: 'Bluebird Corner Cafe' })).toBeVisible();
   await page.getByRole('button', { name: 'Audit report' }).click();
   await expect(page.getByRole('heading', { name: 'Bluebird Corner Cafe' })).toBeVisible();
-  await expect(page.getByText('This business, website and audit results are fictional.')).toBeVisible();
+  await expect(page.getByText('This business and website are fictional. Automated findings are simulated except where measurements are shown.')).toBeVisible();
   await expect(page.getByText('Review mobile usability', { exact: true })).toBeVisible();
   await expect(page.getByText('Add a contact or booking path', { exact: true })).toBeVisible();
   await expect(page.getByText('Sample profile includes a name, phone number and opening hours. No Google request is made.')).toBeVisible();
@@ -270,6 +270,14 @@ test('screenshot evidence is saved, included in a proposal, and attached to prev
   await page.getByRole('button', { name: 'View report' }).click();
   await page.getByLabel('Screenshot for Add a contact or booking path').setInputFiles('public/bluebird-evidence.jpg');
   await expect(page.getByAltText('Screenshot context for Add a contact or booking path')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Expand screenshot for Add a contact or booking path' }).locator('.evidence-rectangle')).toHaveCount(0);
+  await page.getByText('Add review details').click();
+  await page.getByRole('combobox', { name: 'View', exact: true }).selectOption('Mobile');
+  await page.getByLabel('Viewport width (CSS px)').fill('390');
+  await page.getByLabel('Viewport height (CSS px)').fill('844');
+  await page.getByLabel('Browser or device').fill('Chrome on Android');
+  await page.getByLabel('Capture date').fill('2026-11-17');
+  await page.getByLabel('Steps to reproduce').fill('Open the home page at 390 pixels wide.');
   await page.getByRole('button', { name: 'Expand screenshot for Add a contact or booking path' }).click();
   const evidenceDialog = page.getByRole('dialog', { name: 'Add a contact or booking path' });
   await evidenceDialog.getByText('Adjust highlight using controls').click();
@@ -288,6 +296,9 @@ test('screenshot evidence is saved, included in a proposal, and attached to prev
   expect(pdf).toContain('/Subtype /Image');
   expect(pdf).toContain('Screenshot context');
   expect(pdf).toContain('The contact section on the home page.');
+  expect(pdf).toContain('Reviewer-reported view: Mobile | 390 x 844 CSS px');
+  expect(pdf).toContain('Open the home page at 390 pixels wide.');
+  expect(pdf).toContain('Chrome on Android | 2026-11-17');
   await page.getByRole('button', { name: 'Continue to outreach' }).click();
   const composer=page.locator('.chat-composer-area');
   await expect(composer.getByRole('link', { name: 'fixture-cafe-proposal.pdf' })).toBeVisible();
@@ -324,11 +335,8 @@ test('sample businesses have matching websites and expandable evidence', async (
   await radar.getByRole('button',{name:'View audit'}).click();
   await expect(page.getByRole('heading',{name:'Luma Hair Studio'})).toBeVisible();
   await expect(page.getByText('Improve search result description', { exact: true })).toBeVisible();
-  await page.getByRole('button',{name:'Expand screenshot for Improve search result description'}).click();
-  const dialog=page.getByRole('dialog',{name:'Improve search result description'});
-  await expect(dialog.getByAltText('Expanded screenshot for Improve search result description')).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(dialog).toBeHidden();
+  await expect(page.getByText('No visual evidence captured for this finding. Verify it before sharing.').first()).toBeVisible();
+  await expect(page.getByRole('button',{name:'Expand screenshot for Improve search result description'})).toHaveCount(0);
 });
 
 test('current location is sent to discovery only after permission', async ({ page, context, request }) => {
@@ -384,7 +392,7 @@ test('review labels can be positioned and appear in the proposal PDF', async ({p
   await page.goto('/');
   await page.getByRole('button',{name:'Audit report'}).click();
   const thumb=page.getByRole('button',{name:'Expand screenshot for Review mobile usability'});
-  await expect(thumb.getByText('REVIEW · Review mobile usability')).toBeVisible();
+  await expect(thumb.getByText('Heading clipped at right edge')).toBeVisible();
   await thumb.click();
   const dialog=page.getByRole('dialog',{name:'Review mobile usability'});
   const image=dialog.locator('.evidence-image');
@@ -436,4 +444,29 @@ test('outreach starts with the latest proposal and removal applies across channe
   await page.getByRole('button',{name:'Attach proposal'}).click();
   await expect(page.locator('.email-compose').getByRole('link',{name:'bluebird-corner-cafe-proposal.pdf'})).toBeVisible();
   await expect(page.locator('.app-brand')).not.toContainText('LOCAL OPPORTUNITIES, FOUND');
+});
+
+
+test('measured mobile evidence matches the demo page and is not reused for unrelated findings', async ({page,context})=>{
+  await page.goto('/');
+  await page.getByRole('button',{name:'Audit report'}).click();
+  const row=page.locator('.finding-row').filter({hasText:'Review mobile usability'});
+  await expect(row.getByText(/390 x 844 CSS pixels/)).toBeVisible();
+  await expect(row.getByText(/heading is clipped/).first()).toBeVisible();
+  const image=row.getByAltText('Screenshot context for Review mobile usability');
+  await expect(image).toBeVisible();
+  expect(await image.evaluate(img=>({width:img.naturalWidth,height:img.naturalHeight}))).toEqual({width:390,height:844});
+  await expect(page.locator('.finding-row').filter({hasText:'Add a contact or booking path'}).getByRole('button',{name:/Expand screenshot/})).toHaveCount(0);
+  const demo=await context.newPage();
+  await demo.setViewportSize({width:390,height:844});
+  await demo.goto('/demo/bluebird');
+  const metrics=await demo.evaluate(()=>({viewport:document.documentElement.clientWidth,width:document.documentElement.scrollWidth,right:Math.ceil(document.querySelector('.bluebird-hero h1').getBoundingClientRect().right)}));
+  expect(metrics.viewport).toBe(390);expect(metrics.width).toBeGreaterThan(metrics.viewport);expect(metrics.right).toBeGreaterThan(metrics.viewport);
+  await demo.close();
+  await page.getByRole('button',{name:'Build proposal'}).click();
+  const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Download bilingual PDF'}).click()]);
+  const pdf=(await readFile(await download.path())).toString('latin1');
+  expect(pdf).toContain('Mobile viewport: 390 x 844 CSS px');
+  expect(pdf).toContain('heading is clipped');
+  expect(pdf).toContain('Screenshot not supplied');
 });
