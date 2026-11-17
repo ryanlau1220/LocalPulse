@@ -1,60 +1,135 @@
 # LocalPulse
 
-A Next.js prototype for discovering local businesses around a chosen area, checking their websites, saving prospects, preparing proposals in English, Bahasa Malaysia or Simplified Chinese, and previewing outreach.
+<p align="center">
+  <img src="public/localpulse-mark.svg" alt="LocalPulse logo" width="120" />
+</p>
 
-## Run on this computer
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&amp;logoColor=white" alt="Next.js 16" />
+  <img src="https://img.shields.io/badge/React-19-149ECA?logo=react&amp;logoColor=white" alt="React 19" />
+  <img src="https://img.shields.io/badge/pnpm-12.16.1-F69220?logo=pnpm&amp;logoColor=white" alt="pnpm 12.16.1" />
+  <img src="https://img.shields.io/badge/Vercel-deployed-000000?logo=vercel&amp;logoColor=white" alt="Deployed on Vercel" />
+</p>
 
-Requires Node.js 20.9 or newer.
+**LocalPulse** helps find local businesses, review their online presence, and prepare an evidence-backed website proposal for an owner.
 
-```sh
+- **Deployed Project:** [localpulse-my.vercel.app](https://localpulse-my.vercel.app/)
+- **Sample company information:** [Download the fictional Bluebird PDF](public/samples/bluebird-company-information.pdf)
+
+> This is a working prototype, not a complete business audit. Demo businesses and outreach conversations are fictional. Live website checks inspect returned HTML rather than a rendered mobile experience; Google review responses cannot currently be verified. Check findings and prices before sharing a proposal.
+
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Installation & Setup](#installation--setup)
+- [Project Structure](#project-structure)
+- [System Architecture](#system-architecture)
+- [Tech Stack](#tech-stack)
+- [Core Features](#core-features)
+
+## Project Overview
+
+Local businesses can be difficult to discover online, and reviewing each website and listing by hand takes time. LocalPulse brings those checks into a guided flow for someone offering website services:
+
+1. **Discover:** search for businesses around Kuala Lumpur or another supported area, select a radar result, or provide company information.
+2. **Audit:** review website and contact signals, Google listing candidates, prioritised opportunities and any available visual evidence.
+3. **Prepare:** customise your business details and an indicative price, then download a branded English, Bahasa Malaysia or Simplified Chinese PDF.
+4. **Start a conversation:** preview an introduction and attachment in a WhatsApp-style or email interface; a simulated interested reply unlocks a proposed before-and-after concept.
+
+Demo mode is enabled by default. It provides four fictional businesses and does not use Google services for the sample flow. The radar is illustrative: its pins are not geographically accurate map positions.
+
+## Installation & Setup
+
+### Run the application
+
+```bash
+git clone https://github.com/ryanlau1220/LocalPulse.git
+cd LocalPulse
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open http://localhost:3001. Leave the development server running; changes to app code will refresh automatically. For a production build use `pnpm build` and `pnpm start` (production mode does not automatically refresh code changes).
+Open [http://localhost:3001](http://localhost:3001). The fictional demo is ready to use without entering data. For a production build, run `pnpm build` followed by `pnpm start`; the production server defaults to port 3000.
 
-## Discovery and audit
+### Configure optional services
 
-- **Demo mode** is on by default and includes four fictional businesses: Bluebird Corner Cafe, Luma Hair Studio, Petal & Stem and Golden Crumb Bakery. Each has its own fictional brand mark, simulated report, and demo website. Business names open websites, and location links open Google Maps searches (general areas for the fictional businesses). Switching to Live restores your live prospects; demo changes stay separate.
+Create a file named `.env.local` in the project root and add only the keys you need:
 
-- **Find businesses** searches OpenStreetMap around the selected area, defaulting to central Kuala Lumpur. Choose Bangsar, Petaling Jaya or Cheras, or explicitly request the device's current location. Coordinates are sent with a live search only after permission. The optional name filters results. Community data can be incomplete or outdated, and the public service may be unavailable or rate-limited. Results credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
-- Website checks fetch the returned HTML and look for HTTP status, HTTPS, a viewport tag, and obvious WhatsApp or booking text. They do not render scripts, check other pages, or provide a full mobile usability assessment. A website absent from the map data is **not** proof that the business has none.
-- Prospects, website check results, proposal details and price are saved in this browser's local storage. Clearing browser data removes them. They are not shared between devices or browsers.
-- The local Google Cloud project `localpulse-audit-20261117` has Places API enabled, billing disabled, and a daily Text Search quota of 25. The project currently responds without billing; Google may restrict unbilled projects, so continued availability is not guaranteed. The API key is stored in the ignored `.env.local` file and restricted to the Places API.
-- **Google listing checks** run when an audit starts and use Google Places API (New) when configured; the user can also retry the check. Copy `.env.example` to `.env.local` and supply `GOOGLE_PLACES_API_KEY` on the server. Configure appropriate API restrictions and Google Cloud quota limits before enabling it. Google has different free allowances for different requested fields; requests can incur charges beyond those allowances. A budget alert is not a spending cap. See [Google's quota instructions](https://developers.google.com/maps/billing-and-pricing/manage-costs). This app does not enforce a billing cap itself. The user must select the correct listing from the returned candidates. Google results are temporary and not saved in local storage. Review responsiveness cannot be established from the information used here and is marked unverified.
-- Choose English, Bahasa Malaysia or Simplified Chinese for the proposal PDF and outreach attachment. Screenshots, supplied company text, and reviewer notes remain in their original language. RM 1,500 is a user-editable illustrative placeholder, not a market quote. The owner should verify findings and pricing before sharing.
-- Outreach is a **demo**: the WhatsApp-style and email views do not connect to an account or send messages. The conversation interface is informed by the user's Quora Chat repository.
-
-This is a local prototype; it has not been hardened or deployed as a public service.
-
-## Tests
-
-Run the repeatable regression suite with:
-
-```sh
-pnpm test
+```dotenv
+GOOGLE_PLACES_API_KEY=your_google_places_key
+GEMINI_API_KEY=your_gemini_key
 ```
 
-It starts a separate local test server on port 3100 and runs desktop and mobile browser checks with isolated, seeded browser storage. Business discovery, website audit and Google responses are mocked; it never sends outreach or uses Google quota. The suite checks discovery, reports, Google-match selection, proposals, demo outreach, saving and removing prospects, manual entry, errors, and animation controls. Test artifacts on failure are written to `test-results/`. If Chrome is unavailable, install the Playwright browser with `pnpm exec playwright install chromium`, or set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to a Chromium executable. `pnpm test:ui` opens Playwright's interactive runner.
+Restart the development server after changing the file. Enable the relevant Google APIs, restrict the keys to their required services and set appropriate quotas. Keep real keys in `.env.local` or deployment secrets; do not commit them or put them in browser-side code. Google service availability and free allowances depend on the project and its billing configuration; a budget alert is not a spending cap.
 
-To check the real services, first run `pnpm dev` and then use `pnpm test:live`. It checks OpenStreetMap discovery and a website audit; add `--google` (`pnpm test:live --google`) to also make **one** Google request, which uses the project's quota. Live checks depend on outside services and real map data, so they can fail when services are unavailable or listings change. They do not send outreach or change saved prospects.
+## Project Structure
 
-## Company information upload
+```text
+LocalPulse/
+├── app/
+│   ├── api/                # Discovery, website audit, Google and document routes
+│   ├── demo/               # Fictional business websites
+│   ├── workspace.js       # Guided discovery, audit, proposal and outreach UI
+│   ├── report-preview.js  # On-screen proposal preview
+│   └── globals.css        # Layout, branding and motion
+├── lib/                    # Audit, evidence, demo data, document and PDF logic
+├── public/
+│   ├── businesses/        # Fictional business logos
+│   ├── evidence/          # Generated inspection views for demo findings
+│   ├── fonts/             # Chinese PDF font and licence
+│   └── samples/           # Sample company-information PDF
+├── scripts/                # Regression, live-check and evidence-capture scripts
+├── tests/                  # Unit and Playwright workflow tests
+├── docs/                   # README screenshot
+├── next.config.js          # Next.js configuration
+└── pnpm-lock.yaml          # Pinned JavaScript dependencies
+```
 
-Use **Upload information** on Discover to upload up to three PDF, XLSX, DOCX, CSV or TXT files (5 MB each), paste company notes, or do both. LocalPulse extracts up to 20 PDF pages, eight spreadsheet sheets and 200 rows per sheet, up to 10,000 characters per file and 24,000 characters in total. Password-protected documents and image-only scanned PDFs cannot be read; use text-based files or paste their contents. Old `.xls` files should be saved as `.xlsx` first.
+Generated files, browser storage and local environment variables are not shared through the repository. The demo websites, screenshots and measurements are committed as fictional examples.
 
-Readable text is sent to Gemini 3.1 Flash-Lite for analysis. Google may use free-tier content to improve its products; do not submit company information unless you have permission to share it. Uploaded files and extracted text are not stored by LocalPulse after processing. The generated summary and recommendations are saved in this browser with the prospect, and identical analyses are cached in server memory for 30 minutes (up to 40 entries); restarting the server clears that cache. AI suggestions and any information not mentioned in a document require verification; an omitted website is not proof that none exists.
+## System Architecture
 
-The local Google Cloud project has billing disabled and the Gemini API enabled. The restricted `GEMINI_API_KEY` is stored in `.env.local`. Free-tier availability and quotas are determined by Google; exhaustion or service unavailability is reported in the app. Demo mode lets you select files and uses prefilled fictional notes, but shows simulated results without reading or uploading those files or making an AI request. Download the example PDF from the upload panel. Switch to Live for real document extraction and Gemini analysis.
+```mermaid
+flowchart LR
+    User["User / website service provider"] --> App["Next.js workspace<br/>discover · audit · proposal · outreach preview"]
+    App --> Demo["Fictional businesses<br/>demo sites + captured evidence"]
+    App --> Browser["Browser storage<br/>prospects + report details"]
+    App --> Discovery["Discovery route"]
+    Discovery --> OSM["OpenStreetMap data"]
+    App --> Audit["Website audit route<br/>HTML signals"]
+    Audit --> Site["Public business website"]
+    App --> Places["Google listing route"]
+    Places --> Google["Google Places API (New)"]
+    App --> Upload["Company information route"]
+    Upload --> Extract["PDF · spreadsheet · document · text extraction"]
+    Extract --> Gemini["Gemini API<br/>preliminary suggestions"]
+    App --> PDF["Browser-generated PDF<br/>proposal + evidence"]
+    App --> Outreach["WhatsApp / email previews<br/>simulated messages"]
+    PDF --> Outreach
+```
 
-The discovery radar is an interactive visualisation, not a geographic map: its pin positions are illustrative. At most 12 results are shown on the radar, while the full list appears below. Click a pin to open a listed website or view its audit. All four demo sites and their findings are fictional. Screenshot thumbnails open at full size, where the reviewer can draw or adjust a labelled red review rectangle. The label and rectangle are included in the PDF; they indicate an area to review and do not by themselves prove that a feature is missing. Live screenshots must be supplied by the reviewer.
+The browser communicates with same-origin Next.js routes for live discovery, website checks, Google lookups and document analysis. API keys stay on the server. The PDF and outreach previews are created in the browser; no message is sent to a business.
 
-## Visual audit evidence
+## Tech Stack
 
-The Bluebird demo deliberately contains a clipped heading on small screens. Its mobile screenshot and the recorded viewport and page widths come from a real Chromium mobile-emulation capture of the fictional site. To regenerate the screenshot and measurements, run `pnpm dev` in one terminal and `pnpm demo:evidence` in another. The capture also generates a separate inspection view for each demo finding: a captured page alongside the links or metadata actually observed on its initial rendered page. These views are labelled as generated fictional evidence; they do not establish what exists on other pages. The capture command only accepts a local demo server.
+| Area | Technology | Purpose |
+| --- | --- | --- |
+| Interface | Next.js 16, React 19, CSS | Guided workspace, responsive layout and motion |
+| Discovery and audit | OpenStreetMap API, Node.js, fast-xml-parser | Find mapped businesses and inspect returned website HTML |
+| Google and AI | Google Places API (New), Gemini API | Listing candidates and company-information suggestions |
+| Documents | jsPDF, pdf-parse, ExcelJS, Mammoth | Generate proposals and extract text from supported uploads |
+| Hosting and data | Vercel, browser local storage | Host the prototype and save prospects on the current browser |
+| Quality and automation | Node.js test runner, Playwright, pnpm | Unit tests, browser workflows and repeatable scripts |
 
-No general live-site screenshots or automated visual usability tests are performed. The existing live audit checks returned HTML, and a missing viewport tag or link is a signal for review, not proof of a rendered defect. For real businesses, upload a relevant screenshot and record the view, viewport size, observation and reproduction steps. Red annotations are reviewer-drawn unless explicitly labelled as measured demo evidence.
+## Core Features
 
-## Solution concept after outreach
+- **Guided discovery:** search a selected area, choose a radar pin, open its website and start an audit. Device location is requested only when you select it.
+- **Fictional demo:** explore Bluebird Corner Cafe, Luma Hair Studio, Petal & Stem and Golden Crumb Bakery, each with a sample website and business branding.
+- **Company information upload:** provide PDF, XLSX, DOCX, CSV or TXT files and notes for preliminary Gemini suggestions. A fictional [sample PDF](public/samples/bluebird-company-information.pdf) is included.
+- **Website and listing checks:** identify signals for website availability, mobile viewport, descriptions, headings, HTTPS, direct links and booking paths; select a matching Google listing when configured.
+- **Action plan and evidence:** review priority and estimated effort, expand a relevant screenshot, add reviewer-supplied evidence and mark an area for review.
+- **Multilingual PDF:** prepare a branded portrait report in English, Bahasa Malaysia or Simplified Chinese with findings, evidence and editable proposal details.
+- **Outreach and comparison preview:** preview a message and attached PDF, simulate an interested response, and send a proposed before-and-after concept within the demo conversation.
+- **Local shortlist:** save prospects and report details in the current browser and switch between the separate demo and live workspaces.
 
-Outreach is a local simulation. When a message with the attached proposal is previewed, a clearly labelled simulated interested reply lets you send a before-and-after concept as a separate outgoing preview. Sent PDF attachments remain clickable in the conversation and clear from the composer. The Bluebird comparison uses the measured mobile screenshot and a second capture with a temporary CSS correction at the same viewport; this is an illustration, not a deployed change. Other businesses show reviewer-provided evidence when available and a clearly labelled generic concept. The comparison is not included in the downloadable proposal PDF, and it is not a quotation.
+Built during [PIVOT 2026: Build with AI](https://luma.com/01d8h02p?tk=d9WPGu)
