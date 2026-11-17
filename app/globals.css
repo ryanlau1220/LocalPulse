@@ -113,3 +113,35 @@ body{display:block}.app-shell{min-height:100dvh;display:flex;background:#f7f5f1;
 .search-row{max-width:570px}.search-row .hero-search{align-items:center}.search-row .hero-search .search-submit,.search-row .hero-search .search-upload{display:grid;place-items:center;flex:none;width:44px;height:44px;min-height:44px;padding:0;margin:0;border:0;border-radius:6px;background:transparent;color:#3e628b;box-shadow:none}.search-row .hero-search .search-upload{color:#1f63b9;background:#e8f1ff}.search-row .hero-search .search-submit:hover,.search-row .hero-search .search-upload:hover{background:#d9eaff;color:#174ea6}.search-row .hero-search button svg{margin:0;animation:none}.search-row .hero-search button:focus-visible{outline:3px solid #1a73e8;outline-offset:-3px}@media(max-width:680px){.search-row .hero-search .search-submit,.search-row .hero-search .search-upload{width:42px;height:42px;min-height:42px}}
 /* Keep the attachment and message field in the composer's normal flow. */
 .chat-window{min-height:0}.chat-body{min-height:0}.chat-composer-area{flex:none;position:relative}.chat-composer-area .chat-compose{display:flex;align-items:center;gap:8px}.chat-composer-area .chat-compose textarea{flex:1;min-width:0;resize:vertical}.message-attachment{text-decoration:none;cursor:pointer}.message-attachment:hover{text-decoration:underline}.comparison-send{display:flex;align-items:center;gap:8px;margin:12px 0 12px auto;padding:10px 14px;border:1px solid #8fc8ad;border-radius:8px;background:#fff;color:#08775f;font-size:11px!important;font-weight:700!important}.comparison-send:hover{background:#e8f7ef}.email-comparison-send{margin:0 22px 20px auto}.email-outgoing{margin-left:auto;border-color:#cce8dc;background:#f1faf5}.proposal-language{display:flex;align-items:center;flex-wrap:wrap;gap:8px 18px;margin:22px 0 8px;padding:0;border:0}.proposal-language legend{margin-bottom:9px;color:#415b79;font-size:11px;font-weight:700}.proposal-form .proposal-language label{display:inline-flex;align-items:center;gap:7px;margin:0;font-size:11px}.proposal-form .proposal-language input{width:auto;min-height:0;margin:0;accent-color:#1a73e8}.proposal-language label:has(input:focus-visible){outline:3px solid #8ab4f8;outline-offset:4px;border-radius:2px}
+/* Audit findings keep each observation beside its evidence when space allows. */
+.report-grid{grid-template-columns:minmax(0,1.9fr) minmax(250px,.85fr)}.finding-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,45%);grid-template-rows:auto 1fr;gap:0 20px}.finding-content>b,.finding-content>p{grid-column:1}.finding-content>.finding-evidence{grid-column:2;grid-row:1 / span 2;margin-top:0;min-width:0}.finding-meta{flex:none}.finding-evidence .evidence-preview{max-width:100%}.proposal-form .proposal-language{display:flex;gap:8px 16px}.proposal-form .proposal-language label{display:inline-flex;align-items:center;gap:7px;line-height:1.2}.proposal-form .proposal-language input[type=radio]{appearance:auto;display:inline-block;flex:none;width:16px;height:16px;min-height:16px;padding:0;margin:0;border:0;box-shadow:none}
+.audit-thinking{min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:46px 20px}.audit-thinking h2{font:700 clamp(1.7rem,3vw,2.7rem)/1.15 Manrope;letter-spacing:-1px;margin:12px 0}.audit-thinking p{color:#6b809a;font-size:12px}.audit-thinking progress{margin-top:24px;width:160px;height:5px;accent-color:#1a73e8}.thinking-orbit{position:relative;width:108px;height:108px;display:grid;place-items:center;color:#2472d7;margin-bottom:25px;border-radius:50%;background:radial-gradient(circle,#d6eaff,#f3f8ff 65%,transparent 66%);box-shadow:0 0 45px #b4d7ff77}.thinking-orbit span{position:absolute;inset:7px;border:1px solid #88bafa;border-radius:50%;animation:thinking-spin 2s linear infinite}.thinking-orbit span:nth-child(2){inset:19px;border-style:dashed;animation-direction:reverse}.thinking-orbit span:nth-child(3){inset:-4px;border-color:#c4ddfb;animation-duration:3s}.thinking-orbit svg{animation:thinking-pulse 1.2s ease-in-out infinite alternate}.thinking-ellipsis{display:inline-block;animation:thinking-pulse .8s ease-in-out infinite alternate}@keyframes thinking-spin{to{transform:rotate(360deg)}}@keyframes thinking-pulse{to{opacity:.4;transform:scale(.9)}}@media(max-width:1000px){.report-grid{grid-template-columns:1fr}}@media(max-width:600px){.finding-content{grid-template-columns:minmax(0,1fr);grid-template-rows:auto}.finding-content>b,.finding-content>p,.finding-content>.finding-evidence{grid-column:1;grid-row:auto}.finding-content>.finding-evidence{margin-top:12px}.finding-row{gap:9px;padding-inline:12px}}
+.proposal-form .proposal-language{margin:22px 22px 8px}
+/* The four-step journey stays in the header at every viewport size. */
+.journey-top{display:flex;gap:clamp(10px,2vw,28px)}
+.journey-top .journey-steps{flex:1;justify-content:center;min-width:0;margin:0;padding:2px;overflow-x:auto;scrollbar-width:thin}
+.journey-top .top-actions{flex:none}
+.journey-top .journey-steps button:focus-visible{outline:3px solid #1a73e8;outline-offset:2px}
+.journey-frame{padding-top:25px}
+/* Use the same inset for all proposal fields, including the fieldset legend. */
+.proposal-form .proposal-language{display:block;min-width:0;margin:22px 22px 8px;padding:0;border:0}
+.proposal-form .proposal-language legend{padding:0;margin:0 0 9px}
+.proposal-form .language-options{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px}
+.proposal-form .language-options label{margin:0}
+.proposal-preview{padding:clamp(12px,2vw,22px)}
+.preview-sheet{width:100%;max-width:none;min-width:0;padding:clamp(26px,4vw,48px)}
+.report-grid{grid-template-columns:minmax(0,1fr)}
+.evidence-summary{min-width:0}
+@media(max-width:850px){.journey-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px}.journey-top .app-brand{grid-column:1;grid-row:1}.journey-top .top-actions{grid-column:2;grid-row:1}.journey-top .journey-steps{grid-column:1 / -1;grid-row:2;justify-content:flex-start;width:100%;padding:2px 0 5px}.journey-frame{padding-top:18px}}
+/* Adjacent panels share a border instead of floating apart. */
+.proposal-grid{gap:0;border:1px solid #dce5f0;border-radius:8px;overflow:clip}
+.proposal-grid>.proposal-form{border:0;border-radius:0}
+.proposal-grid>.proposal-preview{border-left:1px solid #dce5f0;border-radius:0}
+.finding-content{column-gap:0}
+.finding-content>b,.finding-content>p{padding-right:16px}
+.finding-content>.finding-evidence{border-left:1px solid #e1e8f1;padding-left:16px}
+.comparison-grid{gap:0;border:1px solid #e0e8f2;border-radius:10px;overflow:clip;background:#fff}
+.comparison-grid>.comparison-card{border:0;border-radius:0}
+.comparison-grid>.comparison-card+.comparison-card{border-left:1px solid #e0e8f2}
+@media(max-width:680px){.proposal-grid>.proposal-preview{border-left:0;border-top:1px solid #dce5f0}}
+@media(max-width:600px){.finding-content>b,.finding-content>p{padding-right:0}.finding-content>.finding-evidence{border-left:0;border-top:1px solid #e1e8f1;padding:12px 0 0}}

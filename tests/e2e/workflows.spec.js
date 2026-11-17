@@ -562,3 +562,63 @@ test('proposal language selection changes the PDF and outgoing attachment', asyn
   expect(en).toContain('A clearer path to your customers');
   expect(en).not.toContain('PENEMUAN DAN LANGKAH SETERUSNYA');
 });
+
+
+test('audit transition and Chinese portrait proposal', async ({page})=>{
+  await page.goto('/');
+  await page.locator('.business-result').first().getByRole('button',{name:'Audit business'}).click();
+  await expect(page.getByText('Connecting the dots')).toBeVisible();
+  await expect(page.getByRole('progressbar',{name:'Preparing audit report'})).toBeVisible();
+  await expect(page.getByText('Where to start')).toBeVisible();
+  if ((await page.viewportSize()).width > 600) {
+    const row=page.locator('.finding-row').first();
+    const description=await row.locator('.finding-content > p').boundingBox();
+    const screenshot=await row.locator('.evidence-preview').boundingBox();
+    expect(screenshot.x).toBeGreaterThan(description.x + description.width - 1);
+  }
+  await page.getByRole('button',{name:'Build proposal'}).click();
+  const labelX=(await page.locator('.proposal-form > label').first().boundingBox()).x;
+  const languageX=(await page.locator('.proposal-language').boundingBox()).x;
+  expect(Math.abs(labelX-languageX)).toBeLessThan(3);
+  await page.getByRole('radio',{name:'中文'}).check();
+  const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Download PDF'}).click()]);
+  const bytes=await readFile(await download.path());
+  expect(bytes.subarray(0,5).toString()).toBe('%PDF-');
+  const mediaBox=bytes.subarray(0,500).toString('latin1').match(/\/MediaBox \[0 0 ([\d.]+) ([\d.]+)\]/);
+  expect(mediaBox).not.toBeNull();
+  expect(Number(mediaBox[1])).toBeLessThan(Number(mediaBox[2]));
+  expect(Number(mediaBox[1])).toBeCloseTo(595.28,1);
+  expect(Number(mediaBox[2])).toBeCloseTo(841.89,1);
+  const {PDFParse}=await import('pdf-parse');
+  const parser=new PDFParse({data:new Uint8Array(bytes)});
+  const text=(await parser.getText()).text;
+  await parser.destroy();
+  expect(text).toContain('网站建议书');
+  expect(text).toContain('检查手机浏览体验');
+  expect(text).toContain('发现与后续建议');
+  expect(text).toContain('此价格仅供参考；');
+});
+
+test('header steps and report and proposal layouts stay aligned', async ({page})=>{
+  await page.goto('/');
+  const nav=page.getByRole('navigation',{name:'Audit steps'});
+  await expect(nav).toBeVisible();
+  expect(await nav.evaluate(el=>!!el.closest('header'))).toBe(true);
+  await page.getByRole('button',{name:'Proposal',exact:true}).click();
+  await expect(page.getByRole('radio',{name:'English',exact:true})).toBeVisible();
+  await expect.poll(async()=>{
+    const field=await page.locator('.proposal-form > label').first().boundingBox();
+    const legend=await page.locator('.proposal-language legend').boundingBox();
+    return Math.abs(field.x-legend.x);
+  }).toBeLessThan(3);
+  const sheet=await page.locator('.preview-sheet').boundingBox();
+  const frame=await page.locator('.proposal-preview').boundingBox();
+  expect((frame.width-sheet.width)/2).toBeLessThan(30);
+  await page.getByRole('button',{name:'Audit report',exact:true}).click();
+  await expect(page.getByText('Where to start')).toBeVisible();
+  await expect.poll(async()=>{
+    const plan=await page.locator('.action-plan').boundingBox();
+    const evidence=await page.locator('.evidence-summary').boundingBox();
+    return evidence.y-(plan.y+plan.height);
+  }).toBeGreaterThanOrEqual(0);
+});
