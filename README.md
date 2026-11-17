@@ -11,7 +11,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open http://localhost:3000 (or the port printed in the terminal). For a production build use `pnpm build` and `pnpm start`.
+Open http://localhost:3001. Leave the development server running; changes to app code will refresh automatically. For a production build use `pnpm build` and `pnpm start` (production mode does not automatically refresh code changes).
 
 ## Discovery and audit
 
@@ -23,4 +23,4 @@ Open http://localhost:3000 (or the port printed in the terminal). For a producti
 - Proposals download as an English and Bahasa Malaysia PDF. RM 1,500 is a user-editable illustrative placeholder, not a market quote. The owner should verify findings and pricing before sharing.
 - Outreach is a **demo**: the WhatsApp-style and email views do not connect to an account or send messages. The conversation interface is informed by the user's Quora Chat repository.
 
-This is a local prototype; it has not been hardened or deployed as a public service. The original static prototype files are retained but are not used by the Next.js app.
+This is a local prototype; it has not been hardened or deployed as a public service.
