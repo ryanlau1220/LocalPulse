@@ -470,3 +470,46 @@ test('measured mobile evidence matches the demo page and is not reused for unrel
   expect(pdf).toContain('heading is clipped');
   expect(pdf).toContain('Screenshot not supplied');
 });
+
+test('an interested reply unlocks a comparison only after a message with a proposal', async ({page})=>{
+  await page.goto('/');
+  await expect(page.getByRole('heading',{name:/Recent searches/})).toBeVisible();
+  await expect(page.locator('.search-row').getByRole('button',{name:'Upload information'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Find businesses'})).toHaveCount(1);
+  await page.getByRole('button',{name:'Outreach',exact:true}).click();
+  const composer=page.locator('.chat-composer-area');
+  await expect(composer.getByRole('link',{name:'bluebird-corner-cafe-proposal.pdf'})).toBeVisible();
+  const [download]=await Promise.all([page.waitForEvent('download'),composer.getByRole('link',{name:'bluebird-corner-cafe-proposal.pdf'}).click()]);
+  const pdf=(await readFile(await download.path())).toString('latin1');
+  expect(pdf).not.toContain('Imagine what could improve');
+  expect(pdf).not.toContain('02 / AFTER');
+  await composer.getByRole('button',{name:'Remove proposal attachment'}).click();
+  await page.getByLabel('Message',{exact:true}).fill('Hello, without a proposal');
+  await page.getByRole('button',{name:'Preview send'}).click();
+  await page.waitForTimeout(1100);
+  await expect(page.getByText('Simulated customer reply')).toHaveCount(0);
+  await expect(page.getByRole('heading',{name:'Imagine what could improve.'})).toHaveCount(0);
+  await composer.getByRole('button',{name:'Attach proposal'}).click();
+  await expect(composer.getByRole('link',{name:'bluebird-corner-cafe-proposal.pdf'})).toBeVisible();
+  await page.getByLabel('Message',{exact:true}).fill('Here is the proposal');
+  await page.getByRole('button',{name:'Preview send'}).click();
+  await expect(page.getByText('Simulated customer reply')).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Imagine what could improve.'})).toBeVisible();
+  await expect(page.getByAltText(/Current demo website on a mobile viewport/)).toBeVisible();
+  await expect(page.getByAltText(/Proposed mobile concept with the full heading/)).toBeVisible();
+  await expect(page.getByText('Both views: 390 × 844 CSS px')).toBeVisible();
+  await page.getByRole('button',{name:'Discover',exact:true}).click();
+  await page.locator('article.business-result').filter({hasText:'Luma Hair Studio'}).getByRole('button',{name:'Audit business'}).click();
+  await page.getByRole('button',{name:'Outreach',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Imagine what could improve.'})).toHaveCount(0);
+});
+
+test('email preview receives a simulated interested reply after sending the attached proposal', async ({page})=>{
+  await page.goto('/');
+  await page.getByRole('button',{name:'Outreach',exact:true}).click();
+  await page.getByRole('button',{name:'Email',exact:true}).click();
+  await expect(page.locator('.email-compose').getByRole('link',{name:'bluebird-corner-cafe-proposal.pdf'})).toBeVisible();
+  await page.getByRole('button',{name:'Preview send'}).click();
+  await expect(page.locator('.email-reply').getByText('Simulated customer reply')).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Imagine what could improve.'})).toBeVisible();
+});

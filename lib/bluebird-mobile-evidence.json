@@ -5,8 +5,13 @@
   "headingRight": 456,
   "headingTop": 184,
   "headingBottom": 340.4375,
+  "proposed": {
+    "viewportWidth": 390,
+    "documentWidth": 390,
+    "headingRight": 367
+  },
   "browser": "Chromium 155.0.8059.39 (mobile emulation)",
-  "capturedAt": "2026-11-17T05:33:12.399Z",
+  "capturedAt": "2026-11-17T05:37:54.804Z",
   "path": "/demo/bluebird",
   "region": {
     "x": 0.72,

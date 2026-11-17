@@ -54,3 +54,7 @@ The discovery radar is an interactive visualisation, not a geographic map: its p
 The Bluebird demo deliberately contains a clipped heading on small screens. Its mobile screenshot and the recorded viewport and page widths come from a real Chromium mobile-emulation capture of the fictional site. To regenerate the screenshot and measurements, run `pnpm dev` in one terminal and `pnpm demo:evidence` in another. The capture command only accepts a local demo server.
 
 No general live-site screenshots or automated visual usability tests are performed. The existing live audit checks returned HTML, and a missing viewport tag or link is a signal for review, not proof of a rendered defect. For real businesses, upload a relevant screenshot and record the view, viewport size, observation and reproduction steps. Red annotations are reviewer-drawn unless explicitly labelled as measured demo evidence.
+
+## Solution concept after outreach
+
+Outreach is a local simulation. When a message with the attached proposal is previewed, a clearly labelled simulated interested reply unlocks a before-and-after concept. The Bluebird comparison uses the measured mobile screenshot and a second capture with a temporary CSS correction at the same viewport; this is an illustration, not a deployed change. Other businesses show reviewer-provided evidence when available and a clearly labelled generic concept. The comparison is not included in the downloadable proposal PDF, and it is not a quotation.
