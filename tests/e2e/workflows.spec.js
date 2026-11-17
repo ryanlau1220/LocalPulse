@@ -153,6 +153,12 @@ test('demo mode supports the complete sample without service calls', async ({ pa
   expect(pdf).toContain('SAMPLE ONLY');
   expect(pdf).toContain('Bluebird Corner Cafe');
   expect(pdf).toContain('LocalPulse Studio');
+  const pages = pdf.match(/\/Type \/Page\b/g) || [];
+  const brandMarks = pdf.match(/\/I0 Do/g) || [];
+  expect(pages.length).toBeGreaterThan(1);
+  expect(brandMarks).toHaveLength(pages.length);
+  const firstPage = pdf.slice(pdf.indexOf('/Type /Page'),pdf.indexOf('/Type /Page',pdf.indexOf('/Type /Page')+11));
+  expect(firstPage).toContain('Review mobile usability');
   await page.getByRole('button', { name: 'Outreach', exact: true }).click();
   await expect(page.getByLabel('Message', { exact: true })).toHaveValue(/Bluebird Corner Cafe/);
   await page.getByRole('button', { name: 'Preview send' }).click();
@@ -519,6 +525,8 @@ test('an interested reply unlocks a comparison only after a message with a propo
   await expect(page.getByAltText(/Current demo website on a mobile viewport/)).toBeVisible();
   await expect(page.getByAltText(/Proposed mobile concept with the full heading/)).toBeVisible();
   await expect(page.getByText('Both views: 390 × 844 CSS px')).toBeVisible();
+  await expect(page.locator('.comparison-grid')).toHaveCSS('gap','0px');
+  await expect(page.locator('.comparison-grid .after-card')).toHaveCSS('border-left-width','1px');
   await page.getByRole('button',{name:'Discover',exact:true}).click();
   await page.locator('article.business-result').filter({hasText:'Luma Hair Studio'}).getByRole('button',{name:'Audit business'}).click();
   await page.getByRole('button',{name:'Outreach',exact:true}).click();
@@ -544,12 +552,13 @@ test('proposal language selection changes the PDF and outgoing attachment', asyn
   await page.goto('/');
   await page.getByRole('button',{name:'Proposal',exact:true}).click();
   await page.getByRole('radio',{name:'Bahasa Malaysia'}).check();
+  await expect(page.locator('.report-preview-sheet h2')).toHaveText('Audit kehadiran laman web dan cadangan');
   const [bmDownload]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Download PDF'}).click()]);
   const bm=(await readFile(await bmDownload.path())).toString('latin1');
   expect(bm).toContain('CADANGAN LAMAN WEB');
   expect(bm).toContain('Semak kebolehgunaan mudah alih');
   expect(bm).toContain('PENEMUAN DAN LANGKAH SETERUSNYA');
-  expect(bm).not.toContain('A clearer path to your customers');
+  expect(bm).not.toContain('Audit overview');
   await page.getByRole('button',{name:'Continue to outreach'}).click();
   const attachment=page.locator('.chat-composer-area').getByRole('link',{name:'bluebird-corner-cafe-proposal.pdf'});
   await expect(attachment).toBeVisible();
@@ -557,9 +566,11 @@ test('proposal language selection changes the PDF and outgoing attachment', asyn
   expect((await readFile(await attachedDownload.path())).toString('latin1')).toContain('CADANGAN LAMAN WEB');
   await page.getByRole('button',{name:'Proposal',exact:true}).click();
   await page.getByRole('radio',{name:'English',exact:true}).check();
+  await expect(page.locator('.report-preview-sheet h2')).toHaveText('Website presence audit & proposal');
+  await expect(page.locator('.report-preview-finding')).toContainText('Review mobile usability');
   const [enDownload]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Download PDF'}).click()]);
   const en=(await readFile(await enDownload.path())).toString('latin1');
-  expect(en).toContain('A clearer path to your customers');
+  expect(en).toContain('Audit overview');
   expect(en).not.toContain('PENEMUAN DAN LANGKAH SETERUSNYA');
 });
 
@@ -581,6 +592,7 @@ test('audit transition and Chinese portrait proposal', async ({page})=>{
   const languageX=(await page.locator('.proposal-language').boundingBox()).x;
   expect(Math.abs(labelX-languageX)).toBeLessThan(3);
   await page.getByRole('radio',{name:'中文'}).check();
+  await expect(page.locator('.report-preview-sheet h2')).toHaveText('网站现况审核与建议书');
   const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Download PDF'}).click()]);
   const bytes=await readFile(await download.path());
   expect(bytes.subarray(0,5).toString()).toBe('%PDF-');
@@ -611,9 +623,11 @@ test('header steps and report and proposal layouts stay aligned', async ({page})
     const legend=await page.locator('.proposal-language legend').boundingBox();
     return Math.abs(field.x-legend.x);
   }).toBeLessThan(3);
-  const sheet=await page.locator('.preview-sheet').boundingBox();
-  const frame=await page.locator('.proposal-preview').boundingBox();
-  expect((frame.width-sheet.width)/2).toBeLessThan(30);
+  await expect(page.locator('.proposal-grid')).toHaveCSS('gap','0px');
+  await expect.poll(async()=>page.locator('.proposal-preview').evaluate(frame=>{
+    const sheet=frame.querySelector('.preview-sheet');
+    return Math.max(Math.abs(frame.clientWidth-sheet.offsetWidth),Math.abs(frame.clientHeight-sheet.offsetHeight));
+  })).toBeLessThanOrEqual(1);
   await page.getByRole('button',{name:'Audit report',exact:true}).click();
   await expect(page.getByText('Where to start')).toBeVisible();
   await expect.poll(async()=>{
