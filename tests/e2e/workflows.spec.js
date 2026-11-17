@@ -32,7 +32,7 @@ test('discover, audit, select Google listing, make proposal and preview outreach
   await page.getByLabel('Indicative starting price (RM)').fill('2300');
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByRole('button', { name: 'Download bilingual PDF' }).click(),
+    page.getByRole('button', { name: 'Download PDF' }).click(),
   ]);
   expect(download.suggestedFilename()).toBe('fixture-cafe-proposal.pdf');
   const contents = await readFile(await download.path());
@@ -147,7 +147,7 @@ test('demo mode supports the complete sample without service calls', async ({ pa
   await expect(page.getByText('The business and findings are fictional.')).toBeVisible();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByRole('button', { name: 'Download bilingual PDF' }).click(),
+    page.getByRole('button', { name: 'Download PDF' }).click(),
   ]);
   const pdf = (await readFile(await download.path())).toString('latin1');
   expect(pdf).toContain('SAMPLE ONLY');
@@ -291,7 +291,7 @@ test('screenshot evidence is saved, included in a proposal, and attached to prev
   await expect(page.getByAltText('Screenshot context for Add a contact or booking path')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Expand screenshot for Add a contact or booking path' }).locator('.evidence-rectangle')).toHaveAttribute('style', /width: 50%/);
   await page.getByRole('button', { name: 'Build proposal' }).click();
-  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download bilingual PDF' }).click()]);
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download PDF' }).click()]);
   const pdf = (await readFile(await download.path())).toString('latin1');
   expect(pdf).toContain('/Subtype /Image');
   expect(pdf).toContain('Screenshot context');
@@ -310,6 +310,8 @@ test('screenshot evidence is saved, included in a proposal, and attached to prev
   await page.getByRole('button', { name: 'Preview send' }).click();
   await expect(page.locator('.bubble').filter({ hasText: 'Here is the proposal' }).getByText('fixture-cafe-proposal.pdf')).toBeVisible();
   await page.getByRole('button', { name: 'Email', exact: true }).click();
+  await page.getByRole('button', { name: 'Attach proposal' }).click();
+  await expect(page.locator('.email-compose').getByRole('link', { name: 'fixture-cafe-proposal.pdf' })).toBeVisible();
   await page.getByRole('button', { name: 'Preview send' }).click();
   await expect(page.locator('.email-previews').getByText('fixture-cafe-proposal.pdf')).toBeVisible();
 });
@@ -410,7 +412,7 @@ test('review labels can be positioned and appear in the proposal PDF', async ({p
   await dialog.getByRole('button',{name:'Close screenshot'}).click();
   await expect(thumb.locator('.evidence-rectangle')).toHaveAttribute('style',/width: 50%/);
   await page.getByRole('button',{name:'Build proposal'}).click();
-  const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Download bilingual PDF'}).click()]);
+  const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Download PDF'}).click()]);
   const pdf=(await readFile(await download.path())).toString('latin1');
   expect(pdf).toContain('REVIEW: Review mobile usability');
 });
@@ -468,7 +470,7 @@ test('measured mobile evidence matches the demo page and is not reused for unrel
   expect(metrics.viewport).toBe(390);expect(metrics.width).toBeGreaterThan(metrics.viewport);expect(metrics.right).toBeGreaterThan(metrics.viewport);
   await demo.close();
   await page.getByRole('button',{name:'Build proposal'}).click();
-  const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Download bilingual PDF'}).click()]);
+  const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Download PDF'}).click()]);
   const pdf=(await readFile(await download.path())).toString('latin1');
   expect(pdf).toContain('Mobile viewport: 390 x 844 CSS px');
   expect(pdf).toContain('heading is clipped');
@@ -485,6 +487,9 @@ test('an interested reply unlocks a comparison only after a message with a propo
   await page.getByRole('button',{name:'Outreach',exact:true}).click();
   const composer=page.locator('.chat-composer-area');
   await expect(composer.getByRole('link',{name:'bluebird-corner-cafe-proposal.pdf'})).toBeVisible();
+  const fileBox=await composer.locator('.composer-attachment').boundingBox();
+  const inputBox=await page.getByLabel('Message',{exact:true}).boundingBox();
+  expect(fileBox.y + fileBox.height).toBeLessThanOrEqual(inputBox.y);
   const [download]=await Promise.all([page.waitForEvent('download'),composer.getByRole('link',{name:'bluebird-corner-cafe-proposal.pdf'}).click()]);
   const pdf=(await readFile(await download.path())).toString('latin1');
   expect(pdf).not.toContain('Imagine what could improve');
@@ -499,7 +504,17 @@ test('an interested reply unlocks a comparison only after a message with a propo
   await expect(composer.getByRole('link',{name:'bluebird-corner-cafe-proposal.pdf'})).toBeVisible();
   await page.getByLabel('Message',{exact:true}).fill('Here is the proposal');
   await page.getByRole('button',{name:'Preview send'}).click();
+  await expect(composer.locator('.composer-attachment')).toHaveCount(0);
+  const sentFile=page.getByRole('link',{name:'Open sent bluebird-corner-cafe-proposal.pdf'});
+  await expect(sentFile).toBeVisible();
+  expect(await sentFile.evaluate(async a => (await fetch(a.href)).status)).toBe(200);
+  const [openedPdf] = await Promise.all([page.waitForEvent('popup'), sentFile.click()]);
+  await expect.poll(() => openedPdf.url()).toMatch(/^blob:/);
+  await openedPdf.close();
   await expect(page.getByText('Simulated customer reply')).toBeVisible();
+  await expect(page.locator('.bubble-incoming').getByText('View proposed comparison')).toHaveCount(0);
+  await expect(page.getByRole('heading',{name:'Imagine what could improve.'})).toHaveCount(0);
+  await page.getByRole('button',{name:'Send proposed comparison'}).click();
   await expect(page.getByRole('heading',{name:'Imagine what could improve.'})).toBeVisible();
   await expect(page.getByAltText(/Current demo website on a mobile viewport/)).toBeVisible();
   await expect(page.getByAltText(/Proposed mobile concept with the full heading/)).toBeVisible();
@@ -517,5 +532,33 @@ test('email preview receives a simulated interested reply after sending the atta
   await expect(page.locator('.email-compose').getByRole('link',{name:'bluebird-corner-cafe-proposal.pdf'})).toBeVisible();
   await page.getByRole('button',{name:'Preview send'}).click();
   await expect(page.locator('.email-reply').getByText('Simulated customer reply')).toBeVisible();
+  await expect(page.locator('.email-reply').getByText('View proposed comparison')).toHaveCount(0);
+  await expect(page.getByRole('heading',{name:'Imagine what could improve.'})).toHaveCount(0);
+  await page.getByRole('button',{name:'Send proposed comparison'}).click();
+  await expect(page.locator('.email-outgoing').getByText('View proposed comparison')).toBeVisible();
   await expect(page.getByRole('heading',{name:'Imagine what could improve.'})).toBeVisible();
+});
+
+
+test('proposal language selection changes the PDF and outgoing attachment', async ({page})=>{
+  await page.goto('/');
+  await page.getByRole('button',{name:'Proposal',exact:true}).click();
+  await page.getByRole('radio',{name:'Bahasa Malaysia'}).check();
+  const [bmDownload]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Download PDF'}).click()]);
+  const bm=(await readFile(await bmDownload.path())).toString('latin1');
+  expect(bm).toContain('CADANGAN LAMAN WEB');
+  expect(bm).toContain('Semak kebolehgunaan mudah alih');
+  expect(bm).toContain('PENEMUAN DAN LANGKAH SETERUSNYA');
+  expect(bm).not.toContain('A clearer path to your customers');
+  await page.getByRole('button',{name:'Continue to outreach'}).click();
+  const attachment=page.locator('.chat-composer-area').getByRole('link',{name:'bluebird-corner-cafe-proposal.pdf'});
+  await expect(attachment).toBeVisible();
+  const [attachedDownload]=await Promise.all([page.waitForEvent('download'),attachment.click()]);
+  expect((await readFile(await attachedDownload.path())).toString('latin1')).toContain('CADANGAN LAMAN WEB');
+  await page.getByRole('button',{name:'Proposal',exact:true}).click();
+  await page.getByRole('radio',{name:'English',exact:true}).check();
+  const [enDownload]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Download PDF'}).click()]);
+  const en=(await readFile(await enDownload.path())).toString('latin1');
+  expect(en).toContain('A clearer path to your customers');
+  expect(en).not.toContain('PENEMUAN DAN LANGKAH SETERUSNYA');
 });
