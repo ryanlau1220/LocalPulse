@@ -24,3 +24,15 @@ Open http://localhost:3001. Leave the development server running; changes to app
 - Outreach is a **demo**: the WhatsApp-style and email views do not connect to an account or send messages. The conversation interface is informed by the user's Quora Chat repository.
 
 This is a local prototype; it has not been hardened or deployed as a public service.
+
+## Tests
+
+Run the repeatable regression suite with:
+
+```sh
+pnpm test
+```
+
+It starts a separate local test server on port 3100 and runs desktop and mobile browser checks with isolated, seeded browser storage. Business discovery, website audit and Google responses are mocked; it never sends outreach or uses Google quota. The suite checks discovery, reports, Google-match selection, proposals, demo outreach, saving and removing prospects, manual entry, errors, and animation controls. Test artifacts on failure are written to `test-results/`. If Chrome is unavailable, install the Playwright browser with `pnpm exec playwright install chromium`, or set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to a Chromium executable. `pnpm test:ui` opens Playwright's interactive runner.
+
+To check the real services, first run `pnpm dev` and then use `pnpm test:live`. It checks OpenStreetMap discovery and a website audit; add `--google` (`pnpm test:live --google`) to also make **one** Google request, which uses the project's quota. Live checks depend on outside services and real map data, so they can fail when services are unavailable or listings change. They do not send outreach or change saved prospects.

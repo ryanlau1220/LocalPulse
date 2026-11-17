@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "node scripts/test.mjs",
+    "test:ui": "node scripts/test.mjs --ui",
+    "test:live": "node scripts/test-live.mjs"
   },
   "dependencies": {
     "fast-xml-parser": "^5.12.1",
@@ -15,5 +18,8 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
-  "packageManager": "pnpm@12.16.1"
+  "packageManager": "pnpm@12.16.1",
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
+  }
 }
