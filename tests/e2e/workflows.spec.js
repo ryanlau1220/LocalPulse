@@ -107,3 +107,62 @@ test('audit API rejects missing and local addresses', async ({ request }) => {
   expect(local.status()).toBe(400);
   expect((await local.json()).error).toContain('public IPv4');
 });
+
+test('demo mode supports the complete sample without service calls', async ({ page }) => {
+  const externalCalls = [];
+  page.on('request', request => {
+    if (/\/api\/(discover|audit|google)(?:\?|$)/.test(request.url())) externalCalls.push(request.url());
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Demo mode' }).click();
+  await expect(page.getByRole('heading', { name: 'Bluebird Corner Cafe' })).toBeVisible();
+  await page.getByRole('button', { name: 'Audit report' }).click();
+  await expect(page.getByRole('heading', { name: 'Bluebird Corner Cafe' })).toBeVisible();
+  await expect(page.getByText('This café, website and audit results are fictional.')).toBeVisible();
+  await expect(page.getByText('Review mobile usability')).toBeVisible();
+  await expect(page.getByText('Add a contact or booking path')).toBeVisible();
+  await expect(page.getByText('Sample profile includes a name, phone number and opening hours. No Google request is made.')).toBeVisible();
+  await page.getByRole('button', { name: 'Reload sample' }).click();
+  await page.getByRole('button', { name: 'Build proposal' }).click();
+  await expect(page.getByText('The business and findings are fictional.')).toBeVisible();
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Download bilingual PDF' }).click(),
+  ]);
+  const pdf = (await readFile(await download.path())).toString('latin1');
+  expect(pdf).toContain('SAMPLE ONLY');
+  expect(pdf).toContain('Bluebird Corner Cafe');
+  expect(pdf).toContain('LocalPulse Studio');
+  await page.getByRole('button', { name: 'Outreach', exact: true }).click();
+  await expect(page.getByLabel('Message', { exact: true })).toHaveValue(/Bluebird Corner Cafe/);
+  await page.getByRole('button', { name: 'Preview send' }).click();
+  await expect(page.locator('.bubble').filter({ hasText: 'Bluebird Corner Cafe' })).toBeVisible();
+  await page.reload();
+  await page.getByRole('button', { name: 'Demo mode' }).click();
+  await page.getByRole('button', { name: 'Saved prospects' }).click();
+  await expect(page.getByText('Fictional sample · simulated report')).toBeVisible();
+  await page.getByRole('button', { name: 'View report' }).click();
+  await page.getByRole('button', { name: 'Outreach', exact: true }).click();
+  await expect(page.getByLabel('Message', { exact: true })).toHaveValue(/Bluebird Corner Cafe/);
+  expect(externalCalls).toEqual([]);
+});
+
+
+test('switching modes preserves live prospects and proposal settings', async ({ page }) => {
+  await seedSavedProspect(page);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Saved prospects' }).click();
+  await expect(page.getByRole('heading', { name: 'Fixture Cafe', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Demo mode' }).click();
+  await expect(page.getByRole('button', { name: 'Demo mode' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('heading', { name: 'Bluebird Corner Cafe' })).toBeVisible();
+  await page.getByRole('button', { name: 'Proposal', exact: true }).click();
+  await expect(page.getByLabel('Your business or name')).toHaveValue('LocalPulse Studio (sample)');
+  await page.getByLabel('Your business or name').fill('Changed demo only');
+  await page.getByRole('button', { name: 'Demo mode' }).click();
+  await expect(page.getByRole('button', { name: 'Demo mode' })).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByRole('heading', { name: 'Fixture Cafe', exact: true })).toBeVisible();
+  const data = await page.evaluate(() => ({ prospects: JSON.parse(localStorage.getItem('localpulse-prospects-v1')), settings: JSON.parse(localStorage.getItem('localpulse-settings-v1')) }));
+  expect(data.prospects.map(p => p.name)).toEqual(['Fixture Cafe']);
+  expect(data.settings.business).not.toBe('Changed demo only');
+});

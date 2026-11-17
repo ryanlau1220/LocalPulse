@@ -15,6 +15,8 @@ Open http://localhost:3001. Leave the development server running; changes to app
 
 ## Discovery and audit
 
+- **Demo mode** in the top-right switch loads Bluebird Corner Cafe, a fictional business with simulated audit findings, an example proposal and a draft conversation. Switching back to Live restores the original workspace; sample changes are not saved to your live prospects. Demo mode resets to Live on refresh. Its example website is not real, and no Google or website request is made. The sample report and downloaded proposal are clearly labelled; sample contact details are used only if your own have not been entered.
+
 - **Find businesses** searches OpenStreetMap's map service in a fixed area around Jalan Telawi. The optional name narrows that area's results. Community data can be incomplete or outdated, and the public service may be unavailable or rate-limited. Results credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright). You can enter a known business manually if search is unavailable.
 - Website checks fetch the returned HTML and look for HTTP status, HTTPS, a viewport tag, and obvious WhatsApp or booking text. They do not render scripts, check other pages, or provide a full mobile usability assessment. A website absent from the map data is **not** proof that the business has none.
 - Prospects, website check results, proposal details and price are saved in this browser's local storage. Clearing browser data removes them. They are not shared between devices or browsers.
